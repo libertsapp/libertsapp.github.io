@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
 <link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/conta.css">
 <link rel="preload" as="image" href="assets/video/inicio-poster.jpg">
 <!-- Liga as animações de entrada antes de pintar (evita "piscar"); quem pede menos movimento fica sem elas -->
 <script>try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("anima")}catch(e){}</script>
@@ -47,12 +48,14 @@
       <li><a href="#perfil">Perfil</a></li>
       <li><a href="#sorteio">Sorteio</a></li>
       <li><a href="#recursos">Recursos</a></li>
+      <li data-so-conta hidden><a href="pedidos/"><i class="ph-bold ph-receipt"></i> Meus pedidos</a></li>
     </ul>
     <a class="btn btn-ouro btn-sm" href="#contato" data-contato>Quero no meu time</a>
     <button class="menu-btn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-movel"><i class="ph-bold ph-list"></i></button>
   </nav>
   <div class="menu-movel" id="menu-movel" hidden>
     <a href="#apps">Apps</a><a href="#perfil">Perfil</a><a href="#sorteio">Sorteio</a><a href="#recursos">Recursos</a>
+<a href="pedidos/" data-so-conta hidden>Meus pedidos</a>
   </div>
 </header>
 
@@ -313,40 +316,71 @@
   </section>
 </main>
 
-<!-- Pop-up "Quero no meu time": monta a mensagem e abre o WhatsApp (nada é enviado sem a pessoa apertar enviar lá) -->
+<!-- Pop-up "Quero no meu time": entrar com Google -> formulário -> pedido gravado na planilha (Apps Script).
+     Com a área de pedidos desligada (js/conta.js sem configuração), vira o formulário que abre o WhatsApp. -->
 <dialog class="pedido" id="pedido" aria-labelledby="pedido-tit">
-  <form class="pedido-caixa" method="dialog" novalidate data-pedido>
+  <div class="pedido-caixa">
     <button class="pedido-fecha" type="button" aria-label="Fechar" data-fecha><i class="ph-bold ph-x"></i></button>
     <img class="pedido-logo" src="assets/marca/MEM1-bg.png" alt="" width="502" height="497">
     <h2 class="pedido-tit" id="pedido-tit">Seu time no <span class="ouro">MemberStars</span></h2>
-    <p class="pedido-sub">Conta o nome do grupo e o esporte. A conversa continua no WhatsApp.</p>
 
-    <div class="campo">
-      <label for="pedido-grupo">Nome do grupo</label>
-      <input id="pedido-grupo" name="grupo" type="text" maxlength="60" autocomplete="organization" placeholder="Ex.: Futebol de Quinta" aria-describedby="pedido-endereco pedido-erro-grupo" required>
-      <p class="campo-ajuda" id="pedido-endereco">Endereço do app: <b>memberstars.com/<span data-slug>seu-grupo</span></b></p>
-      <p class="campo-erro" id="pedido-erro-grupo" data-erro-grupo hidden></p>
-    </div>
+    <section class="passo" data-passo="entrar" hidden>
+      <p class="pedido-sub">Entre com o Google para fazer o pedido e acompanhar cada etapa depois.</p>
+      <div class="google-btn" data-google></div>
+      <p class="campo-erro" data-erro-login role="alert" hidden></p>
+      <a class="pedido-alt" href="#" data-whats-direto><i class="ph-fill ph-whatsapp-logo"></i> Prefiro falar no WhatsApp</a>
+    </section>
 
-    <fieldset class="campo">
-      <legend>Esporte</legend>
-      <div class="opcoes">
-        <label><input type="radio" name="esporte" value="Vôlei"><span><i class="ph-fill ph-volleyball"></i>Vôlei</span></label>
-        <label><input type="radio" name="esporte" value="Futebol / society"><span><i class="ph-fill ph-soccer-ball"></i>Futebol</span></label>
-        <label><input type="radio" name="esporte" value="Futevôlei / vôlei de praia"><span><i class="ph-fill ph-sun"></i>Futevôlei</span></label>
-        <label><input type="radio" name="esporte" value="Beach tennis / padel"><span><i class="ph-fill ph-tennis-ball"></i>Beach tennis</span></label>
-        <label><input type="radio" name="esporte" value="Basquete"><span><i class="ph-fill ph-basketball"></i>Basquete</span></label>
-        <label><input type="radio" name="esporte" value="Outro"><span><i class="ph-fill ph-plus-circle"></i>Outro</span></label>
+    <form class="passo" data-passo="form" data-pedido novalidate>
+      <p class="pedido-sub" data-sub-form>Conta o nome do grupo e o esporte. A conversa continua no WhatsApp.</p>
+      <p class="pedido-conta" data-so-conta hidden><i class="ph-fill ph-user-circle"></i> Pedido em nome de <b data-nome-conta></b> · <button type="button" class="link-btn" data-trocar-conta>trocar conta</button></p>
+
+      <div class="campo">
+        <label for="pedido-grupo">Nome do grupo</label>
+        <input id="pedido-grupo" name="grupo" type="text" maxlength="60" autocomplete="organization" placeholder="Ex.: Futebol de Quinta" aria-describedby="pedido-endereco pedido-erro-grupo" required>
+        <p class="campo-ajuda" id="pedido-endereco">Endereço do app: <b>memberstars.com/<span data-slug>seu-grupo</span></b></p>
+        <p class="campo-erro" id="pedido-erro-grupo" data-erro-grupo hidden></p>
       </div>
-      <div class="campo-outro" data-outro hidden>
-        <label for="pedido-outro">Qual esporte?</label>
-        <input id="pedido-outro" name="outro" type="text" maxlength="40" placeholder="Ex.: handebol">
-      </div>
-      <p class="campo-erro" data-erro-esporte hidden></p>
-    </fieldset>
 
-    <button class="btn btn-ouro pedido-envia" type="submit"><i class="ph-fill ph-whatsapp-logo"></i> Enviar no WhatsApp</button>
-  </form>
+      <fieldset class="campo">
+        <legend>Esporte</legend>
+        <div class="opcoes">
+          <label><input type="radio" name="esporte" value="Vôlei"><span><i class="ph-fill ph-volleyball"></i>Vôlei</span></label>
+          <label><input type="radio" name="esporte" value="Futebol / society"><span><i class="ph-fill ph-soccer-ball"></i>Futebol</span></label>
+          <label><input type="radio" name="esporte" value="Futevôlei / vôlei de praia"><span><i class="ph-fill ph-sun"></i>Futevôlei</span></label>
+          <label><input type="radio" name="esporte" value="Beach tennis / padel"><span><i class="ph-fill ph-tennis-ball"></i>Beach tennis</span></label>
+          <label><input type="radio" name="esporte" value="Basquete"><span><i class="ph-fill ph-basketball"></i>Basquete</span></label>
+          <label><input type="radio" name="esporte" value="Outro"><span><i class="ph-fill ph-plus-circle"></i>Outro</span></label>
+        </div>
+        <div class="campo-outro" data-outro hidden>
+          <label for="pedido-outro">Qual esporte?</label>
+          <input id="pedido-outro" name="outro" type="text" maxlength="40" placeholder="Ex.: handebol">
+        </div>
+        <p class="campo-erro" data-erro-esporte hidden></p>
+      </fieldset>
+
+      <div class="campo" data-so-conta hidden>
+        <label for="pedido-celular">Celular (WhatsApp)</label>
+        <input id="pedido-celular" name="celular" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="(31) 98731-0965" aria-describedby="pedido-erro-celular">
+        <p class="campo-erro" id="pedido-erro-celular" data-erro-celular hidden></p>
+      </div>
+
+      <p class="campo-erro pedido-erro" data-erro-envio role="alert" hidden></p>
+      <a class="btn btn-vidro pedido-whats-erro" href="#" target="_blank" rel="noopener" data-whats-erro hidden><i class="ph-fill ph-whatsapp-logo"></i> Enviar pelo WhatsApp</a>
+      <button class="btn btn-ouro pedido-envia" type="submit" data-envia><i class="ph-fill ph-whatsapp-logo"></i> Enviar no WhatsApp</button>
+    </form>
+
+    <section class="passo" data-passo="pronto" hidden>
+      <p class="pronto-selo"><i class="ph-fill ph-check-circle"></i> <span>Pedido <b data-numero></b> recebido</span></p>
+      <p class="pedido-sub" data-pronto-grupo></p>
+      <div data-pronto-tempo></div>
+      <p class="pronto-dica">Cada mudança de etapa aparece em Meus pedidos, com esta mesma conta Google.</p>
+      <div class="pronto-botoes">
+        <a class="btn btn-ouro" href="pedidos/" data-pronto-acompanhar><i class="ph-bold ph-list-checks"></i> Acompanhar pedido</a>
+        <a class="btn btn-vidro" href="#" target="_blank" rel="noopener" data-pronto-whats><i class="ph-fill ph-whatsapp-logo"></i> Falar no WhatsApp</a>
+      </div>
+    </section>
+  </div>
 </dialog>
 
 <footer class="rodape">
@@ -358,6 +392,7 @@
   <p class="rodape-copy">© 2026 MemberStars</p>
 </footer>
 
+<script src="js/conta.js" defer></script>
 <script src="js/site.js" defer></script>
 </body>
 </html>

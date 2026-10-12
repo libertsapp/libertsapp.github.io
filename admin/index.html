@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel de pedidos | MemberStars</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#070d1c">
+<link rel="icon" type="image/png" href="../assets/marca/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@500;600;700&family=Orbitron:wght@800;900&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="stylesheet" href="../css/conta.css">
+<script>try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("anima")}catch(e){}</script>
+</head>
+<body class="pagina-conta">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="topo rolou">
+  <nav class="topo-nav" aria-label="Principal">
+    <a class="marca" href="../" aria-label="MemberStars, início">
+      <img src="../assets/marca/MEM1-bg.png" alt="" width="502" height="497">
+      <span class="marca-nome">MEMBER<b>STARS</b></span>
+    </a>
+    <a class="btn btn-vidro btn-sm topo-voltar" href="../"><i class="ph-bold ph-arrow-left"></i> Site</a>
+  </nav>
+</header>
+
+<main class="conta conta-larga" id="conteudo">
+  <div class="conta-cabeca">
+    <h1 class="conta-tit">Painel de <span class="ouro">pedidos</span></h1>
+    <div class="conta-quem" data-quem hidden>
+      <img data-foto alt="" width="32" height="32" referrerpolicy="no-referrer">
+      <span data-nome></span>
+      <button class="btn btn-vidro btn-sm" type="button" data-sair><i class="ph-bold ph-sign-out"></i> Sair</button>
+    </div>
+  </div>
+
+  <section class="conta-estado" data-estado="desligado" hidden>
+    <p>A área de pedidos ainda não foi configurada (js/conta.js).</p>
+  </section>
+
+  <section class="conta-estado" data-estado="entrar" hidden>
+    <p>Entre com a conta Google de administrador.</p>
+    <div class="google-btn" data-google></div>
+    <p class="campo-erro" data-erro-login role="alert" hidden></p>
+  </section>
+
+  <section class="conta-estado" data-estado="negado" hidden>
+    <p>Esta área é só do administrador. Se você é o administrador, entre com a conta certa.</p>
+  </section>
+
+  <section data-estado="carregando" aria-busy="true" aria-label="Carregando pedidos" hidden>
+    <div class="cartao esqueleto"></div>
+  </section>
+
+  <section class="conta-estado" data-estado="erro" hidden>
+    <p data-erro-texto role="alert"></p>
+    <button class="btn btn-vidro" type="button" data-tentar><i class="ph-bold ph-arrows-clockwise"></i> Tentar de novo</button>
+  </section>
+
+  <section data-estado="lista" hidden>
+    <div class="adm-ferramentas">
+      <div class="adm-filtros" data-filtros role="group" aria-label="Filtrar por etapa"></div>
+      <div class="adm-busca">
+        <label class="so-leitor" for="adm-busca">Buscar</label>
+        <i class="ph-bold ph-magnifying-glass" aria-hidden="true"></i>
+        <input id="adm-busca" type="search" placeholder="Grupo, e-mail ou celular" data-busca>
+      </div>
+      <button class="btn btn-vidro btn-sm" type="button" data-atualizar><i class="ph-bold ph-arrows-clockwise"></i> Atualizar</button>
+    </div>
+    <ul class="adm-lista" data-lista></ul>
+    <p class="conta-estado" data-nenhum hidden>Nenhum pedido com esse filtro.</p>
+  </section>
+</main>
+
+<script src="../js/conta.js" defer></script>
+<script src="../js/admin.js" defer></script>
+</body>
+</html>

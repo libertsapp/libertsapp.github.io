@@ -28,5 +28,10 @@ const texto = decodeURIComponent(link.split('?text=')[1]);
 assert.ok(texto.includes('*Grupo:* Vôlei de Terça'));
 assert.ok(texto.includes('*Esporte:* Vôlei'));
 assert.ok(texto.includes('memberstars.com/volei-de-terca'));
+// passo "Pronto" do pop-up: a mensagem já leva o número do pedido
+const comNumero = decodeURIComponent(linkWhatsApp('Vôlei de Terça', 'Vôlei', 'MS-0007').split('?text=')[1]);
+assert.ok(comNumero.startsWith('Olá! Acabei de fazer o pedido *MS-0007* do MemberStars.'), comNumero);
+assert.ok(comNumero.includes('*Grupo:* Vôlei de Terça'));
+assert.ok(!texto.includes('MS-'), 'sem número, a mensagem é a de antes');
 console.log(texto);
 console.log('TODOS OS TESTES PASSARAM');

@@ -20,8 +20,11 @@ function enderecoDoGrupo(nome) {
     .replace(/-+$/g, '');
 }
 
-function linkWhatsApp(grupo, esporte) {
-  var texto = 'Olá! Quero o MemberStars no meu time.\n\n' +
+// Com número (passo "Pronto" do pop-up), a mensagem já cita o pedido gravado na planilha.
+function linkWhatsApp(grupo, esporte, numero) {
+  var texto = (numero
+      ? 'Olá! Acabei de fazer o pedido *' + numero + '* do MemberStars.\n\n'
+      : 'Olá! Quero o MemberStars no meu time.\n\n') +
     '*Grupo:* ' + grupo + '\n' +
     '*Esporte:* ' + esporte + '\n' +
     '*Endereço desejado:* memberstars.com/' + enderecoDoGrupo(grupo);
@@ -92,11 +95,24 @@ if (typeof document !== 'undefined') (function () {
     requestAnimationFrame(passo);
   }
 
-  /* ---------- pop-up "Quero no meu time" -> WhatsApp ---------- */
+  /* ---------- pop-up "Quero no meu time": entrar com Google -> formulário -> pedido gravado ----------
+     A planilha é gravada pelo Apps Script (js/conta.js). Sem configuração lá, a área fica desligada e o
+     pop-up manda direto para o WhatsApp, como antes. */
   var pedido = $('#pedido'), form = $('[data-pedido]');
   var campoGrupo = $('#pedido-grupo'), campoOutro = $('#pedido-outro'), caixaOutro = $('[data-outro]');
   var slug = $('[data-slug]'), erroGrupo = $('[data-erro-grupo]'), erroEsporte = $('[data-erro-esporte]');
+  var campoCelular = $('#pedido-celular'), erroCelular = $('[data-erro-celular]');
+  var erroEnvio = $('[data-erro-envio]'), botaoWhatsErro = $('[data-whats-erro]'), botaoEnvia = $('[data-envia]');
+  var lugarGoogle = $('[data-google]'), erroLogin = $('[data-erro-login]'), nomeConta = $('[data-nome-conta]');
   var temDialog = pedido && typeof pedido.showModal === 'function';
+  var comConta = typeof Conta !== 'undefined' && !!Conta && Conta.configurada();
+  var TEXTO_ENVIA = comConta ? '<i class="ph-bold ph-paper-plane-tilt"></i> Enviar pedido' : '<i class="ph-fill ph-whatsapp-logo"></i> Enviar no WhatsApp';
+  var enviando = false;
+
+  // celular, "pedido em nome de" e o link Meus pedidos só existem com a área de pedidos ligada
+  $$('[data-so-conta]').forEach(function (el) { el.hidden = !comConta; });
+  botaoEnvia.innerHTML = TEXTO_ENVIA;
+  if (comConta) $('[data-sub-form]').textContent = 'Conta o nome do grupo, o esporte e o seu WhatsApp.';
 
   function esporteEscolhido() {
     var marcado = $('input[name="esporte"]:checked', form);
@@ -110,28 +126,67 @@ if (typeof document !== 'undefined') (function () {
   function atualizaEndereco() {
     var s = enderecoDoGrupo(campoGrupo.value);
     slug.textContent = s || 'seu-grupo';
-    if (ENDERECOS_EM_USO.indexOf(s) >= 0) mostraErro(erroGrupo, null, 'Esse endereço já é de outro grupo. Tudo bem, a gente combina um parecido no WhatsApp.');
+    if (ENDERECOS_EM_USO.indexOf(s) >= 0) mostraErro(erroGrupo, null, comConta ? 'Esse endereço já é de outro grupo. Tente outro nome.' : 'Esse endereço já é de outro grupo. Tudo bem, a gente combina um parecido no WhatsApp.');
     else if (!erroGrupo.hidden && campoGrupo.getAttribute('aria-invalid') !== 'true') mostraErro(erroGrupo, null, '');
+  }
+  function mostraPasso(nome) {
+    $$('[data-passo]', pedido).forEach(function (p) { p.hidden = p.dataset.passo !== nome; });
+  }
+  function entrouNoPedido(sessao) {
+    nomeConta.textContent = sessao.nome;
+    mostraPasso('form');
+    campoGrupo.focus();
+  }
+  // mensagem: por que voltou ao login (sessão vencida, ou o servidor recusou o token)
+  function pedeLogin(mensagem) {
+    mostraPasso('entrar');
+    mostraErro(erroLogin, null, mensagem || '');
+    Conta.entrar(lugarGoogle, entrouNoPedido).catch(function () {
+      mostraErro(erroLogin, null, 'Não deu para abrir o login do Google. Você pode falar com a gente direto no WhatsApp.');
+    });
+  }
+  function mostraPronto(p) {
+    $('[data-numero]', pedido).textContent = p.numero;
+    $('[data-pronto-grupo]', pedido).textContent = p.grupo + ' · memberstars.com/' + p.endereco;
+    var lugar = $('[data-pronto-tempo]', pedido);
+    lugar.textContent = '';
+    lugar.appendChild(Conta.linhaDoTempo(p.etapa));
+    $('[data-pronto-whats]', pedido).href = linkWhatsApp(p.grupo, p.esporte, p.numero);
+    mostraPasso('pronto');
+    $('[data-pronto-acompanhar]', pedido).focus();
   }
   function abrePedido(esporte) {
     if (!temDialog) { window.open(linkWhatsApp('(nome do grupo)', esporte || '(esporte)'), '_blank', 'noopener'); return; }
     form.reset(); caixaOutro.hidden = true; slug.textContent = 'seu-grupo';
-    mostraErro(erroGrupo, campoGrupo, ''); mostraErro(erroEsporte, null, '');
+    mostraErro(erroGrupo, campoGrupo, ''); mostraErro(erroEsporte, null, ''); mostraErro(erroCelular, campoCelular, ''); mostraErro(erroEnvio, null, '');
+    botaoWhatsErro.hidden = true;
     if (esporte) { var op = $('input[name="esporte"][value="' + esporte + '"]', form); if (op) op.checked = true; }
     pedido.showModal();
-    campoGrupo.focus();
+    var sessao = comConta ? Conta.atual() : null;
+    if (!comConta) { mostraPasso('form'); campoGrupo.focus(); }
+    else if (sessao) entrouNoPedido(sessao);
+    else pedeLogin();
   }
 
   $$('[data-contato]').forEach(function (a) {
     a.addEventListener('click', function (ev) { ev.preventDefault(); abrePedido(a.dataset.esporte); });
   });
   if (temDialog) {
-    $('[data-fecha]', form).addEventListener('click', function () { pedido.close(); });
+    $('[data-fecha]', pedido).addEventListener('click', function () { pedido.close(); });
     // clicar no fundo escuro fora da caixa também fecha
     pedido.addEventListener('click', function (ev) { if (ev.target === pedido) pedido.close(); });
+    $('[data-whats-direto]', pedido).addEventListener('click', function (ev) {
+      ev.preventDefault();
+      window.open(linkWhatsApp('(nome do grupo)', esporteEscolhido() || '(esporte)'), '_blank', 'noopener');
+    });
+    $('[data-trocar-conta]', pedido).addEventListener('click', function () { Conta.sair(); pedeLogin(); });
     campoGrupo.addEventListener('input', function () {
       if (campoGrupo.getAttribute('aria-invalid') === 'true' && enderecoDoGrupo(campoGrupo.value)) mostraErro(erroGrupo, campoGrupo, '');
       atualizaEndereco();
+    });
+    campoCelular.addEventListener('input', function () {
+      campoCelular.value = formatarCelular(campoCelular.value);
+      if (campoCelular.getAttribute('aria-invalid') === 'true' && celularValido(campoCelular.value)) mostraErro(erroCelular, campoCelular, '');
     });
     $$('input[name="esporte"]', form).forEach(function (r) {
       r.addEventListener('change', function () {
@@ -142,19 +197,48 @@ if (typeof document !== 'undefined') (function () {
     });
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
+      if (enviando) return;   // clique duplo não grava dois pedidos
       var grupo = campoGrupo.value.trim().replace(/\s+/g, ' ');
       var esporte = esporteEscolhido();
-      var ok = true;
-      if (!enderecoDoGrupo(grupo)) { mostraErro(erroGrupo, campoGrupo, 'Digite o nome do grupo (pelo menos uma letra ou número).'); ok = false; }
+      var grupoOk = !!enderecoDoGrupo(grupo);
+      var celularOk = !comConta || celularValido(campoCelular.value);
+      mostraErro(erroGrupo, campoGrupo, grupoOk ? '' : 'Digite o nome do grupo (pelo menos uma letra ou número).');
       if (!esporte) {
         var marcadoOutro = $('input[name="esporte"][value="Outro"]:checked', form);
         mostraErro(erroEsporte, marcadoOutro ? campoOutro : null, marcadoOutro ? 'Escreva qual é o esporte.' : 'Escolha o esporte do grupo.');
-        ok = false;
       }
-      if (!ok) { (enderecoDoGrupo(grupo) ? (esporte ? campoGrupo : (caixaOutro.hidden ? $('input[name="esporte"]', form) : campoOutro)) : campoGrupo).focus(); return; }
-      window.open(linkWhatsApp(grupo, esporte), '_blank', 'noopener');
-      pedido.close();
+      if (comConta) mostraErro(erroCelular, campoCelular, celularOk ? '' : 'Digite o celular com DDD, ex.: (31) 98731-0965.');
+      if (!grupoOk || !esporte || !celularOk) {
+        (!grupoOk ? campoGrupo : !esporte ? (caixaOutro.hidden ? $('input[name="esporte"]', form) : campoOutro) : campoCelular).focus();
+        return;
+      }
+      if (!comConta) { window.open(linkWhatsApp(grupo, esporte), '_blank', 'noopener'); pedido.close(); return; }
+
+      enviando = true;
+      botaoEnvia.disabled = true;
+      botaoEnvia.innerHTML = '<i class="ph-bold ph-circle-notch gira"></i> Gravando…';
+      mostraErro(erroEnvio, null, '');
+      botaoWhatsErro.hidden = true;
+      Conta.chamar('criarPedido', { grupo: grupo, esporte: esporte, celular: campoCelular.value })
+        .then(mostraPronto)
+        .catch(function (err) {
+          // sessão vencida: volta ao login; o formulário continua preenchido por baixo
+          if (err.precisaEntrar) { pedeLogin(err.mensagem); return; }
+          mostraErro(erroEnvio, null, err.mensagem || 'Não deu para gravar agora.');
+          botaoWhatsErro.href = linkWhatsApp(grupo, esporte);
+          botaoWhatsErro.hidden = false;
+        })
+        .then(function () {
+          enviando = false;
+          botaoEnvia.disabled = false;
+          botaoEnvia.innerHTML = TEXTO_ENVIA;
+        });
     });
+    // /pedidos/ manda para "/#pedir" quando a pessoa quer fazer outro pedido
+    if (location.hash === '#pedir') {
+      history.replaceState(null, '', location.pathname + location.search);
+      abrePedido();
+    }
   }
 
   /* ---------- topo ganha fundo depois que a pessoa sai do alto da página ---------- */
