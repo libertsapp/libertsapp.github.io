@@ -112,3 +112,15 @@
   .adm-linha { grid-template-columns: 1fr; gap: 12px; padding: 16px; }
   .adm-busca { flex-basis: 100%; }
 }
+
+/* ---------- Recado do admin para o cliente ---------- */
+.cartao-recado { margin: 4px 0 14px; padding: 14px 16px; border-radius: var(--raio-p); background: rgba(245,197,66,.08); border: 1px solid rgba(245,197,66,.35); border-left-width: 4px; }
+.cartao-recado-tit { display: flex; align-items: center; gap: 6px; font-family: var(--f-hud); font-weight: 700; font-size: .85rem; color: var(--ouro); }
+.cartao-recado-tit i { font-size: 1.1rem; }
+.cartao-recado-texto { margin-top: 6px; color: var(--tinta); white-space: pre-line; overflow-wrap: anywhere; }
+.adm-recado { grid-column: 1 / -1; display: grid; gap: 6px; padding-top: 12px; border-top: 1px solid var(--linha); }
+.adm-recado label { font-family: var(--f-hud); font-weight: 600; font-size: .85rem; color: var(--tinta-2); }
+.adm-recado textarea { width: 100%; min-height: 64px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--linha-forte); background: rgba(7,13,28,.7); color: var(--tinta); font: inherit; font-size: .95rem; resize: vertical; }
+.adm-recado textarea::placeholder { color: #8a95b4; }
+.adm-recado textarea:focus { outline: none; border-color: var(--ouro); box-shadow: 0 0 0 3px rgba(245,197,66,.25); }
+.adm-recado-acoes { display: flex; align-items: center; gap: 12px; }

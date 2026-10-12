@@ -33,7 +33,9 @@ function abaFalsa() {
     getLastRow() { return dados.length; },
     getRange(linha, coluna) {
       return {
-        setValue(v) { dados[linha - 1][coluna - 1] = comoSheets(v, (formatos[linha - 1] || [])[coluna - 1]); },
+        getValue() { return (dados[linha - 1] || [])[coluna - 1]; },
+        setValue(v) { dados[linha - 1][coluna - 1] = comoSheets(v, (formatos[linha - 1] || [])[coluna - 1]); return this; },
+        setNumberFormat(fmt) { (formatos[linha - 1] = formatos[linha - 1] || [])[coluna - 1] = fmt; return this; },
         setNumberFormats(fs) { formatos[linha - 1] = fs[0].slice(); return this; },
         setValues(vs) {
           const f = formatos[linha - 1] || [];
@@ -89,7 +91,7 @@ function criarScriptFalso(opcoes = {}) {
 
   if (opcoes.linhas) {
     const aba = planilha.insertSheet(contexto.ABA);
-    aba.appendRow(Array.from(contexto.COLUNAS));
+    aba.appendRow(opcoes.cabecalho || Array.from(contexto.COLUNAS));
     opcoes.linhas.forEach(r => aba.appendRow(r));
   }
 

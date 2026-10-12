@@ -29,6 +29,16 @@
     li.appendChild(el('h2', 'cartao-grupo', p.grupo));
     li.appendChild(el('p', 'cartao-info', p.esporte + ' · memberstars.com/' + p.endereco));
     li.appendChild(Conta.linhaDoTempo(p.etapa));
+    if (p.recado) {
+      // recado do admin: texto puro, as quebras de linha ficam por conta do CSS (white-space)
+      var recado = el('div', 'cartao-recado');
+      var titulo = el('p', 'cartao-recado-tit');
+      titulo.innerHTML = '<i class="ph-fill ph-chat-circle-text"></i> ';
+      titulo.appendChild(document.createTextNode('Recado da equipe MemberStars'));
+      recado.appendChild(titulo);
+      recado.appendChild(el('p', 'cartao-recado-texto', p.recado));
+      li.appendChild(recado);
+    }
     var quando = formatarData(p.atualizadoEm);
     if (quando) li.appendChild(el('p', 'cartao-data', 'Atualizado em ' + quando));
     if (p.etapa === 'Concluído') {

@@ -89,8 +89,55 @@
     etapa.appendChild(seletor);
     etapa.appendChild(salvo);
 
-    [id, grupo, contato, etapa].forEach(function (c) { li.appendChild(c); });
+    [id, grupo, contato, etapa, campoRecado(p)].forEach(function (c) { li.appendChild(c); });
     return li;
+  }
+
+  // Recado que o cliente vê em /pedidos/. Um por pedido: salvar troca o anterior; em branco apaga.
+  function campoRecado(p) {
+    var caixa = el('div', 'adm-recado');
+    var rotulo = el('label', '', 'Recado para o cliente');
+    var texto = el('textarea');
+    texto.id = 'recado-' + p.numero;
+    rotulo.htmlFor = texto.id;
+    texto.rows = 2;
+    texto.maxLength = 500;
+    texto.placeholder = 'Ex.: Mandamos o link de teste no seu WhatsApp.';
+    texto.value = p.recado || '';
+    var botao = el('button', 'btn btn-vidro btn-sm');
+    botao.type = 'button';
+    botao.setAttribute('data-salvar-recado', '');
+    botao.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> Salvar recado';
+    var aviso = el('span', 'adm-salvo');
+    aviso.setAttribute('data-salvo-recado', '');
+    aviso.setAttribute('aria-live', 'polite');
+    texto.addEventListener('input', function () { aviso.textContent = texto.value.trim() === (p.recado || '') ? '' : 'Não salvo'; aviso.className = 'adm-salvo'; });
+    botao.addEventListener('click', function () {
+      botao.disabled = true;
+      aviso.className = 'adm-salvo';
+      aviso.textContent = 'Salvando…';
+      Conta.chamar('mudarRecado', { numero: p.numero, recado: texto.value })
+        .then(function (novo) {
+          p.recado = novo.recado;
+          p.atualizadoEm = novo.atualizadoEm;
+          texto.value = novo.recado;
+          aviso.textContent = novo.recado ? 'Salvo ✓' : 'Recado apagado ✓';
+        })
+        .catch(function (err) {
+          // o texto digitado fica no campo para tentar de novo
+          aviso.className = 'adm-salvo erro';
+          aviso.textContent = err.mensagem || 'Não salvou. Tente de novo.';
+          if (err.precisaEntrar) pedeLogin(err.mensagem);
+        })
+        .then(function () { botao.disabled = false; });
+    });
+    var linhaBotao = el('div', 'adm-recado-acoes');
+    linhaBotao.appendChild(botao);
+    linhaBotao.appendChild(aviso);
+    caixa.appendChild(rotulo);
+    caixa.appendChild(texto);
+    caixa.appendChild(linhaBotao);
+    return caixa;
   }
 
   function desenhaLista() {

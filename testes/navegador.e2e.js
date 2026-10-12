@@ -149,6 +149,7 @@ async function roteiroPedidos(navegador, largura) {
   assert.ok(pedido('Pelada <b>do</b> Zé', 'Futebol / society').ok);
   assert.ok(pedido('Vôlei de Domingo', 'Vôlei').ok);
   script.chamar('mudarEtapa', tAdmin, { numero: 'MS-0001', etapa: 'Concluído' });
+  script.chamar('mudarRecado', tAdmin, { numero: 'MS-0002', recado: 'Mandamos o link de teste no WhatsApp.\nResponde lá <b>quando</b> puder.' });
 
   let { pagina, erros, contexto } = await novaPagina(navegador, largura, { usuario: KAREN, script });
   await pagina.goto(BASE + 'pedidos/');
@@ -166,6 +167,11 @@ async function roteiroPedidos(navegador, largura) {
   assert.strictEqual(await abrir.getAttribute('href'), 'https://memberstars.com/pelada-b-do-b-ze/');
   assert.strictEqual(await pagina.locator('.cartao:first-child a:has-text("Abrir meu app")').count(), 0);
   assert.strictEqual(await pagina.textContent('[data-nome]'), 'Karen Souza');
+  // recado do admin: só no pedido que tem, como texto, com a quebra de linha
+  assert.strictEqual(await pagina.locator('.cartao-recado').count(), 1);
+  assert.strictEqual(await pagina.textContent('.cartao:first-child .cartao-recado-texto'), 'Mandamos o link de teste no WhatsApp.\nResponde lá <b>quando</b> puder.');
+  assert.strictEqual(await pagina.locator('.cartao-recado b').count(), 0);
+  assert.ok((await pagina.evaluate(() => getComputedStyle(document.querySelector('.cartao-recado-texto')).whiteSpace)).startsWith('pre'));
   await semRolagemLateral(pagina);
 
   // admin muda a etapa; "Atualizar" mostra sem recarregar a página
@@ -247,6 +253,18 @@ async function roteiroAdmin(navegador, largura) {
   await pagina.click('[data-filtros] .chip:has-text("Em produção")');
   assert.strictEqual(await pagina.locator('.adm-linha').count(), 1);
   assert.strictEqual(await pagina.textContent('[data-filtros] .chip[aria-pressed="true"]'), 'Em produção 1');
+
+  // recado para o cliente: salva na planilha e aparece em /pedidos/
+  assert.strictEqual(await pagina.inputValue('.adm-linha textarea'), '');
+  await pagina.fill('.adm-linha textarea', 'Mandamos o link de teste.\nConfira até sexta.');
+  await pagina.click('.adm-linha [data-salvar-recado]');
+  await pagina.waitForSelector('.adm-linha [data-salvo-recado]:has-text("Salvo")');
+  assert.strictEqual(script.linhas()[1][10], 'Mandamos o link de teste.\nConfira até sexta.');
+  assert.strictEqual(script.chamar('meusPedidos', tKaren).dados.find(p => p.numero === 'MS-0001').recado, 'Mandamos o link de teste.\nConfira até sexta.');
+  // recado longo demais: o servidor recusa e o texto digitado fica no campo
+  await pagina.fill('.adm-linha textarea', 'x'.repeat(501));
+  assert.strictEqual((await pagina.inputValue('.adm-linha textarea')).length, 500, 'o campo não deixa passar de 500');
+  await semRolagemLateral(pagina);
 
   // falha ao salvar: a lista volta à etapa anterior e avisa
   await contexto.route(URL_FALSA, r => r.abort());

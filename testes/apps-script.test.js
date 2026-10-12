@@ -46,7 +46,7 @@ const com = extra => Object.assign({}, base, extra);
   assert.strictEqual(r1.dados.celular, undefined, 'cliente não recebe celular de volta');
   assert.strictEqual(r1.dados.email, undefined, 'cliente não recebe e-mail de volta');
   assert.match(r1.dados.criadoEm, /^\d{4}-\d{2}-\d{2}T/);
-  assert.strictEqual(s.linhas()[0].join('|'), 'Número|Criado em|E-mail|Nome Google|Celular|Grupo|Endereço|Esporte|Etapa|Atualizado em');
+  assert.strictEqual(s.linhas()[0].join('|'), 'Número|Criado em|E-mail|Nome Google|Celular|Grupo|Endereço|Esporte|Etapa|Atualizado em|Recado');
   const l1 = s.linhas()[1];
   assert.strictEqual(l1[0], 'MS-0001');
   assert.strictEqual(l1[2], 'karen@teste.com', 'e-mail em minúsculas');
@@ -139,6 +139,41 @@ const com = extra => Object.assign({}, base, extra);
   const f = s.chamar('criarPedido', bruno, com({ grupo: '=Time', celular: '31987310965' }));
   assert.strictEqual(f.dados.grupo, '=Time');
   assert.strictEqual(s.chamar('meusPedidos', bruno).dados[0].grupo, '=Time');
+}
+
+// 7. Recado do admin para o cliente
+{
+  const s = criarScriptFalso();
+  s.chamar('criarPedido', karen, base);
+  assert.strictEqual(s.chamar('meusPedidos', karen).dados[0].recado, '', 'sem recado, vem vazio');
+  assert.strictEqual(s.chamar('mudarRecado', karen, { numero: 'MS-0001', recado: 'oi' }).codigo, 'admin', 'cliente não grava recado');
+  const limpo = 'Mandamos o link de teste no seu WhatsApp.\n\nConfira até sexta.';
+  const r = s.chamar('mudarRecado', adm, { numero: 'MS-0001', recado: '  Mandamos o link de teste   no seu WhatsApp.\r\n\n\n\nConfira até sexta. ' });
+  assert.ok(r.ok, JSON.stringify(r));
+  assert.strictEqual(r.dados.recado, limpo, 'espaços limpos, quebra de linha mantida');
+  assert.strictEqual(s.chamar('meusPedidos', karen).dados[0].recado, limpo);
+  assert.strictEqual(s.chamar('todosPedidos', adm).dados[0].recado, limpo);
+  assert.strictEqual(s.chamar('meusPedidos', bruno).dados.length, 0, 'recado não vaza para outra conta');
+  assert.strictEqual(s.chamar('mudarRecado', adm, { numero: 'MS-0001', recado: 'x'.repeat(501) }).ok, false, 'até 500 caracteres');
+  assert.strictEqual(s.chamar('mudarRecado', adm, { numero: 'MS-9999', recado: 'oi' }).ok, false);
+  assert.ok(s.chamar('mudarRecado', adm, { numero: 'MS-0001', recado: '=IMPORTXML("x")' }).ok);
+  assert.strictEqual(s.linhas()[1][10][0], "'", 'fórmula no recado vira texto');
+  assert.strictEqual(s.chamar('meusPedidos', karen).dados[0].recado, '=IMPORTXML("x")');
+  assert.strictEqual(s.chamar('mudarRecado', adm, { numero: 'MS-0001', recado: '0012' }).dados.recado, '0012', 'recado só de número continua texto');
+  assert.ok(s.chamar('mudarRecado', adm, { numero: 'MS-0001', recado: '   ' }).ok);
+  assert.strictEqual(s.chamar('meusPedidos', karen).dados[0].recado, '', 'recado em branco apaga');
+}
+
+// 8. Planilha criada antes da coluna Recado: o cabeçalho ganha a coluna sozinho
+{
+  const antigo = ['Número', 'Criado em', 'E-mail', 'Nome Google', 'Celular', 'Grupo', 'Endereço', 'Esporte', 'Etapa', 'Atualizado em'];
+  const s = criarScriptFalso({ cabecalho: antigo, linhas: [
+    ['MS-0001', new Date('2026-09-01T12:00:00Z'), 'karen@teste.com', 'Karen', '5531987310965', 'Velho FC', 'velho-fc', 'Vôlei', 'Recebido', new Date('2026-09-01T12:00:00Z')],
+  ] });
+  assert.strictEqual(s.chamar('meusPedidos', karen).dados[0].recado, '', 'linha antiga, de 10 colunas, lê recado vazio');
+  assert.ok(s.chamar('mudarRecado', adm, { numero: 'MS-0001', recado: 'Bem-vindos' }).ok);
+  assert.strictEqual(s.linhas()[0][10], 'Recado');
+  assert.strictEqual(s.chamar('meusPedidos', karen).dados[0].recado, 'Bem-vindos');
 }
 
 console.log('TODOS OS TESTES PASSARAM');
