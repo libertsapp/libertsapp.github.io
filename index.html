@@ -1,1 +1,363 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MemberStars | Apps de esporte para o seu grupo</title>
+<meta name="description" content="Check-in, sorteio de times equilibrado, ranking, Hall da Fama e caixa do grupo. Apps de esporte para quem joga toda semana.">
+<meta name="theme-color" content="#070d1c">
+<link rel="canonical" href="https://memberstars.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://memberstars.com/">
+<meta property="og:title" content="MemberStars | Apps de esporte para o seu grupo">
+<meta property="og:description" content="Check-in, sorteio de times, ranking e Hall da Fama para o grupo que joga toda semana.">
+<meta property="og:image" content="https://memberstars.com/assets/marca/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/marca/favicon.png">
+<link rel="apple-touch-icon" href="assets/marca/icone-180.png">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@500;600;700&family=Orbitron:wght@800;900&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Ícones: Phosphor (versão fixa, só os pesos usados) -->
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="preload" as="image" href="assets/video/inicio-poster.jpg">
+<!-- Liga as animações de entrada antes de pintar (evita "piscar"); quem pede menos movimento fica sem elas -->
+<script>try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("anima")}catch(e){}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<!-- Fundo vivo: feixes de luz de estádio cruzando a tela (fixo, não repinta no scroll) -->
+<div class="estadio" aria-hidden="true">
+  <span class="feixe f1"></span><span class="feixe f2"></span><span class="feixe f3"></span>
+  <span class="brilho b1"></span><span class="brilho b2"></span>
+</div>
+
+<header class="topo" id="topo">
+  <nav class="topo-nav" aria-label="Principal">
+    <a class="marca" href="#inicio" aria-label="MemberStars, início">
+      <img src="assets/marca/MEM1-bg.png" alt="" width="502" height="497">
+      <span class="marca-nome">MEMBER<b>STARS</b></span>
+    </a>
+    <ul class="topo-links">
+      <li><a href="#apps">Apps</a></li>
+      <li><a href="#perfil">Perfil</a></li>
+      <li><a href="#sorteio">Sorteio</a></li>
+      <li><a href="#recursos">Recursos</a></li>
+    </ul>
+    <a class="btn btn-ouro btn-sm" href="#contato" data-contato>Quero no meu time</a>
+    <button class="menu-btn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-movel"><i class="ph-bold ph-list"></i></button>
+  </nav>
+  <div class="menu-movel" id="menu-movel" hidden>
+    <a href="#apps">Apps</a><a href="#perfil">Perfil</a><a href="#sorteio">Sorteio</a><a href="#recursos">Recursos</a>
+  </div>
+</header>
+
+<main id="conteudo">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="inicio">
+    <div class="hero-txt">
+      <p class="sobrelinha revela" style="--i:0"><i class="ph-fill ph-star"></i> Apps para grupos de esporte</p>
+      <h1 class="hero-titulo">
+        <span class="linha"><span class="palavra" style="--i:1">Seu</span> <span class="palavra" style="--i:2">time</span> <span class="palavra" style="--i:3">joga.</span></span>
+        <span class="linha ouro"><span class="palavra" style="--i:4">A</span> <span class="palavra" style="--i:5">gente</span> <span class="palavra" style="--i:6">conta</span> <span class="palavra" style="--i:7">tudo.</span></span>
+      </h1>
+      <p class="hero-sub revela" style="--i:8">Check-in, sorteio de times equilibrado, ranking e Hall da Fama para o grupo que joga toda semana.</p>
+      <div class="hero-ctas revela" style="--i:9">
+        <a class="btn btn-ouro" href="#contato" data-contato><i class="ph-bold ph-trophy"></i> Quero no meu time</a>
+        <a class="btn btn-vidro" href="#recursos"><i class="ph-fill ph-play"></i> Ver o app em ação</a>
+      </div>
+    </div>
+
+    <div class="hero-palco" data-parallax>
+      <div class="anel" aria-hidden="true"></div>
+      <img class="hero-escudo" src="assets/marca/MEM1-bg.png" alt="" aria-hidden="true" width="502" height="497">
+      <figure class="celular" data-camada="1">
+        <div class="celular-tela">
+          <video class="tela-video ativa" muted playsinline loop preload="auto" poster="assets/video/inicio-poster.jpg" data-src="assets/video/inicio.mp4" aria-label="Tela inicial do app: campeões da semana"></video>
+          <video class="tela-video" muted playsinline loop preload="none" poster="assets/video/sorteio-poster.jpg" data-src="assets/video/sorteio.mp4" aria-label="Check-in e sorteio de times no app"></video>
+          <video class="tela-video" muted playsinline loop preload="none" poster="assets/video/ranking-poster.jpg" data-src="assets/video/ranking.mp4" aria-label="Ranking anual no app"></video>
+        </div>
+        <figcaption class="celular-legenda"><span data-legenda>Campeões da semana</span></figcaption>
+      </figure>
+
+      <div class="chip-hud c1" data-camada="2">
+        <span class="chip-rotulo">Aproveitamento</span>
+        <span class="chip-num verde"><span data-conta="67">0</span>%</span>
+      </div>
+      <div class="chip-hud c2" data-camada="3">
+        <i class="ph-fill ph-fire"></i>
+        <span><span class="chip-num ouro" data-conta="9">0</span><span class="chip-rotulo">terças seguidas</span></span>
+      </div>
+      <div class="chip-hud c3" data-camada="1.5">
+        <span class="estrelas" aria-label="5 estrelas"><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i></span>
+        <span class="chip-rotulo">Craque da rodada</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAIXA DE ESPORTES (único letreiro da página) ============ -->
+  <div class="letreiro" aria-label="Esportes: vôlei, futebol, futevôlei, beach tennis, basquete, handebol">
+    <div class="letreiro-trilho" aria-hidden="true">
+      <div class="letreiro-grupo">
+        <span>VÔLEI</span><i class="ph-fill ph-volleyball"></i>
+        <span class="vazado">FUTEBOL</span><i class="ph-fill ph-soccer-ball"></i>
+        <span>FUTEVÔLEI</span><i class="ph-fill ph-star"></i>
+        <span class="vazado">BEACH TENNIS</span><i class="ph-fill ph-tennis-ball"></i>
+        <span>BASQUETE</span><i class="ph-fill ph-basketball"></i>
+        <span class="vazado">HANDEBOL</span><i class="ph-fill ph-trophy"></i>
+      </div>
+      <div class="letreiro-grupo">
+        <span>VÔLEI</span><i class="ph-fill ph-volleyball"></i>
+        <span class="vazado">FUTEBOL</span><i class="ph-fill ph-soccer-ball"></i>
+        <span>FUTEVÔLEI</span><i class="ph-fill ph-star"></i>
+        <span class="vazado">BEACH TENNIS</span><i class="ph-fill ph-tennis-ball"></i>
+        <span>BASQUETE</span><i class="ph-fill ph-basketball"></i>
+        <span class="vazado">HANDEBOL</span><i class="ph-fill ph-trophy"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ APPS ============ -->
+  <section class="secao apps" id="apps">
+    <div class="apps-destaque surge">
+      <div class="apps-destaque-midia">
+        <video muted playsinline loop preload="none" poster="assets/video/sorteio-poster.jpg" data-src="assets/video/sorteio.mp4" data-autoplay aria-label="Gravação do app de vôlei: check-in confirmado"></video>
+      </div>
+      <div class="apps-destaque-txt">
+        <span class="selo"><i class="ph-fill ph-circle"></i> Em uso toda semana</span>
+        <h2 class="titulo-secao">MemberStars <span class="ouro">Vôlei</span></h2>
+        <p>Nasceu numa quadra de terça à noite e hoje organiza dois grupos de vôlei. Check-in, sorteio, ranking, caixa e o placar de cada rodada.</p>
+        <a class="link-seta" href="#recursos">Conhecer os recursos <i class="ph-bold ph-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="apps-lista">
+      <h3 class="apps-lista-titulo surge">Outro esporte? A gente monta.</h3>
+      <a class="esporte surge" href="#contato" data-contato data-esporte="Futebol / society" style="--i:1"><i class="ph-fill ph-soccer-ball"></i><span><b>Futebol e society</b><small>Times por posição e artilharia</small></span><i class="ph-bold ph-arrow-up-right seta"></i></a>
+      <a class="esporte surge" href="#contato" data-contato data-esporte="Futevôlei / vôlei de praia" style="--i:2"><i class="ph-fill ph-volleyball"></i><span><b>Futevôlei e vôlei de praia</b><small>Duplas que se revezam</small></span><i class="ph-bold ph-arrow-up-right seta"></i></a>
+      <a class="esporte surge" href="#contato" data-contato data-esporte="Beach tennis / padel" style="--i:3"><i class="ph-fill ph-tennis-ball"></i><span><b>Beach tennis e padel</b><small>Chaves e ranking por dupla</small></span><i class="ph-bold ph-arrow-up-right seta"></i></a>
+      <a class="esporte surge" href="#contato" data-contato data-esporte="Basquete" style="--i:4"><i class="ph-fill ph-basketball"></i><span><b>Basquete</b><small>Pontos, rebotes e MVP da noite</small></span><i class="ph-bold ph-arrow-up-right seta"></i></a>
+    </div>
+  </section>
+
+  <!-- ============ PERFIL DO JOGADOR (painel estilo jogo de gestão) ============ -->
+  <section class="secao perfil" id="perfil">
+    <div class="cabeca-secao surge">
+      <h2 class="titulo-secao">Cada jogador com a sua <span class="ouro">ficha de craque</span></h2>
+      <p>Rodadas, vitórias, aproveitamento e sequência de presença. Tudo calculado sozinho a cada rodada lançada.</p>
+    </div>
+
+    <div class="hud surge" data-hud>
+      <div class="hud-barra">
+        <span class="hud-tit"><i class="ph-bold ph-identification-card"></i> Perfil do jogador</span>
+        <span class="hud-aviso">Jogadora fictícia, dados de exemplo</span>
+      </div>
+
+      <div class="hud-grade">
+        <!-- coluna 1: identidade -->
+        <div class="hud-id">
+          <div class="avatar">
+            <img src="assets/telas/avatar-karen.png" alt="Avatar ilustrado da jogadora Karen Souza" width="110" height="110">
+            <span class="avatar-pos">1º</span>
+          </div>
+          <div>
+            <h3 class="hud-nome">Karen Souza</h3>
+            <p class="hud-funcao">Levantadora</p>
+            <span class="estrelas" aria-label="4 estrelas"><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-bold ph-star apagada"></i></span>
+            <div class="tags"><span class="tag tag-verde">Ativa</span><span class="tag tag-ouro">Em sequência</span></div>
+          </div>
+          <div class="aneis">
+            <figure class="medidor" data-medidor="92"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="m-trilho" cx="40" cy="40" r="32"/><circle class="m-arco" cx="40" cy="40" r="32"/></svg><figcaption><b data-conta="92">0</b><small>Presença %</small></figcaption></figure>
+            <figure class="medidor" data-medidor="67"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="m-trilho" cx="40" cy="40" r="32"/><circle class="m-arco" cx="40" cy="40" r="32"/></svg><figcaption><b data-conta="67">0</b><small>Aproveit. %</small></figcaption></figure>
+            <figure class="medidor" data-medidor="67"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="m-trilho" cx="40" cy="40" r="32"/><circle class="m-arco" cx="40" cy="40" r="32"/></svg><figcaption><b data-conta="8">0</b><small>Títulos</small></figcaption></figure>
+          </div>
+        </div>
+
+        <!-- coluna 2: atributos em colunas, como num jogo -->
+        <div class="hud-atributos">
+          <div class="atr-grupo">
+            <h4>Em quadra</h4>
+            <dl>
+              <div><dt>Rodadas</dt><dd class="verde" data-conta="12">0</dd></div>
+              <div><dt>Vitórias de partida</dt><dd class="verde" data-conta="31">0</dd></div>
+              <div><dt>Títulos</dt><dd class="ouro" data-conta="8">0</dd></div>
+              <div><dt>Ranking</dt><dd class="ouro">1º</dd></div>
+            </dl>
+          </div>
+          <div class="atr-grupo">
+            <h4>Presença</h4>
+            <dl>
+              <div><dt>Sequência atual</dt><dd class="verde" data-conta="9">0</dd></div>
+              <div><dt>Terças no ano</dt><dd class="verde">11/12</dd></div>
+              <div><dt>Faltas</dt><dd class="vermelho" data-conta="1">0</dd></div>
+            </dl>
+          </div>
+          <div class="atr-grupo">
+            <h4>Parcerias</h4>
+            <dl>
+              <div><dt>Melhor parceiro</dt><dd class="txt">Léo Martins</dd></div>
+              <div><dt>Vitórias juntos</dt><dd class="verde" data-conta="11">0</dd></div>
+              <div><dt>Parceiro difícil</dt><dd class="txt">Hugo Alves</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- coluna 3: radar -->
+        <figure class="hud-radar">
+          <svg viewBox="-185 -112 370 222" role="img" aria-labelledby="radar-tit">
+            <title id="radar-tit">Radar da Karen comparado ao melhor do grupo: presença 92, vitórias 78, títulos 100, sequência 75, parcerias 64 (em %)</title>
+            <g class="r-grade" data-radar-grade></g>
+            <polygon class="r-forma" data-radar-forma points="0,0 0,0 0,0 0,0 0,0"/>
+            <g data-radar-pontos></g>
+            <g class="r-rotulos" data-radar-rotulos></g>
+          </svg>
+          <figcaption>Comparado ao melhor do grupo</figcaption>
+        </figure>
+      </div>
+
+      <div class="hud-graficos">
+        <figure class="grafico" data-grafico-linha>
+          <figcaption class="g-tit">Aproveitamento por mês <small>% de partidas vencidas</small></figcaption>
+          <div class="g-area">
+            <svg viewBox="0 0 520 220" role="img" aria-label="Aproveitamento por mês de março a outubro: 50, 58, 55, 70, 64, 80, 72 e 67 por cento">
+              <g class="g-grade" data-linha-grade></g>
+              <path class="g-linha" data-linha-path d=""/>
+              <line class="g-mira" data-linha-mira x1="0" x2="0" y1="10" y2="180"/>
+              <g data-linha-pontos></g>
+            </svg>
+            <div class="dica" data-dica hidden></div>
+          </div>
+        </figure>
+
+        <figure class="grafico" data-grafico-barras>
+          <figcaption class="g-tit">Aproveitamento no grupo <small>top 5 da temporada</small></figcaption>
+          <div class="legenda"><span><i class="lg lg-voce"></i>Karen</span><span><i class="lg lg-grupo"></i>Outros jogadores</span></div>
+          <ol class="barras" data-barras></ol>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SORTEIO INTERATIVO ============ -->
+  <section class="secao sorteio" id="sorteio">
+    <div class="sorteio-txt surge">
+      <h2 class="titulo-secao">Sorteio que <span class="ouro">ninguém reclama</span></h2>
+      <p>Equilibra as estrelas de cada um e espalha as mulheres entre os times. Aperte o botão e veja.</p>
+      <div class="controle" role="radiogroup" aria-label="Número de times">
+        <button type="button" role="radio" aria-checked="false" data-times="2">2 times</button>
+        <button type="button" role="radio" aria-checked="true" data-times="3">3 times</button>
+        <button type="button" role="radio" aria-checked="false" data-times="4">4 times</button>
+      </div>
+      <button class="btn btn-ouro btn-sortear" type="button" data-sortear><i class="ph-fill ph-dice-five"></i> Sortear times</button>
+      <p class="sorteio-placar" aria-live="polite" data-placar>12 jogadores confirmados no check-in.</p>
+    </div>
+    <div class="quadra surge" data-quadra>
+      <div class="quadra-times" data-times-area></div>
+    </div>
+  </section>
+
+  <!-- ============ RECURSOS (bento com telas reais do app) ============ -->
+  <section class="secao recursos" id="recursos">
+    <div class="cabeca-secao centro surge">
+      <h2 class="titulo-secao">Tudo que acontece no grupo, <span class="ouro">num app só</span></h2>
+    </div>
+    <div class="bento">
+      <article class="cel cel-checkin surge" data-holofote>
+        <div class="cel-txt"><i class="ph-fill ph-check-square"></i><h3>Check-in em um toque</h3><p>A lista da semana se monta sozinha: quem confirmou, quem é convidado e quem sumiu.</p></div>
+        <img src="assets/telas/checkin.jpg" alt="Tela de check-in do app com jogadores confirmados" loading="lazy" width="540" height="958">
+      </article>
+      <article class="cel cel-ranking surge" data-holofote style="--i:1">
+        <div class="cel-txt"><i class="ph-fill ph-trophy"></i><h3>Ranking da temporada</h3><p>Pódio, títulos e aproveitamento atualizados a cada rodada.</p></div>
+        <video muted playsinline loop preload="none" poster="assets/video/ranking-poster.jpg" data-src="assets/video/ranking.mp4" data-autoplay aria-label="Gravação do ranking anual do app"></video>
+      </article>
+      <article class="cel cel-hall surge" data-holofote style="--i:2">
+        <div class="cel-txt"><i class="ph-fill ph-bank"></i><h3>Hall da Fama</h3><p>Quem mais saiu na foto de campeão em cada mês e em cada ano.</p></div>
+        <img src="assets/telas/hall.jpg" alt="Tela do Hall da Fama do app" loading="lazy" width="540" height="958">
+      </article>
+      <article class="cel cel-caixa surge" data-holofote style="--i:3">
+        <div class="cel-txt"><i class="ph-fill ph-coins"></i><h3>Caixa do grupo</h3><p>Mensalidade, avulso e crédito de dia sem jogo. Sem planilha.</p></div>
+        <img src="assets/telas/financeiro.jpg" alt="Tela do caixa do grupo com saldo e saldo previsto" loading="lazy" width="540" height="958">
+      </article>
+      <article class="cel cel-hist surge" data-holofote style="--i:4">
+        <div class="cel-txt"><i class="ph-fill ph-clock-counter-clockwise"></i><h3>Histórico completo</h3><p>Cada rodada guardada, com times, horário e campeões.</p></div>
+        <img src="assets/telas/historico.jpg" alt="Tela de histórico de rodadas do app" loading="lazy" width="540" height="958">
+      </article>
+      <article class="cel cel-jog surge" data-holofote style="--i:5">
+        <div class="cel-txt"><i class="ph-fill ph-users-three"></i><h3>Elenco com estrelas</h3><p>Cadastro com foto, nota e login com Google para cada jogador.</p></div>
+        <img src="assets/telas/jogadores.jpg" alt="Tela de jogadores do app com fotos e estrelas" loading="lazy" width="540" height="958">
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ COMO COMEÇA (linha do tempo que se desenha no scroll) ============ -->
+  <section class="secao comeco" id="comeco">
+    <h2 class="titulo-secao surge">Do grupo de WhatsApp para a quadra em <span class="ouro">três jogadas</span></h2>
+    <ol class="jogadas" data-jogadas>
+      <li class="jogada surge" style="--i:0"><span class="jogada-icone"><i class="ph-fill ph-users-three"></i></span><h3>Cadastre o elenco</h3><p>Nome, foto e estrelas de cada jogador. A gente ajuda a importar a lista.</p></li>
+      <li class="jogada surge" style="--i:1"><span class="jogada-icone"><i class="ph-fill ph-check-circle"></i></span><h3>Abra o check-in</h3><p>Manda o link no grupo e cada um confirma a presença no celular.</p></li>
+      <li class="jogada surge" style="--i:2"><span class="jogada-icone"><i class="ph-fill ph-dice-five"></i></span><h3>Sorteie e jogue</h3><p>Times equilibrados em segundos. Depois do jogo, o ranking se atualiza.</p></li>
+    </ol>
+  </section>
+
+  <!-- ============ CHAMADA FINAL ============ -->
+  <section class="secao final" id="contato">
+    <img class="final-escudo" src="assets/marca/MEM1-bg.png" alt="" aria-hidden="true" width="502" height="497" loading="lazy">
+    <h2 class="final-titulo surge">Seu grupo merece um <span class="ouro">placar de verdade.</span></h2>
+    <p class="final-sub surge">Conta como o seu time joga e a gente prepara o app com a cara de vocês.</p>
+    <a class="btn btn-ouro btn-grande surge" href="#contato" data-contato><i class="ph-bold ph-trophy"></i> Quero no meu time</a>
+  </section>
+</main>
+
+<!-- Pop-up "Quero no meu time": monta a mensagem e abre o WhatsApp (nada é enviado sem a pessoa apertar enviar lá) -->
+<dialog class="pedido" id="pedido" aria-labelledby="pedido-tit">
+  <form class="pedido-caixa" method="dialog" novalidate data-pedido>
+    <button class="pedido-fecha" type="button" aria-label="Fechar" data-fecha><i class="ph-bold ph-x"></i></button>
+    <img class="pedido-logo" src="assets/marca/MEM1-bg.png" alt="" width="502" height="497">
+    <h2 class="pedido-tit" id="pedido-tit">Seu time no <span class="ouro">MemberStars</span></h2>
+    <p class="pedido-sub">Conta o nome do grupo e o esporte. A conversa continua no WhatsApp.</p>
+
+    <div class="campo">
+      <label for="pedido-grupo">Nome do grupo</label>
+      <input id="pedido-grupo" name="grupo" type="text" maxlength="60" autocomplete="organization" placeholder="Ex.: Futebol de Quinta" aria-describedby="pedido-endereco pedido-erro-grupo" required>
+      <p class="campo-ajuda" id="pedido-endereco">Endereço do app: <b>memberstars.com/<span data-slug>seu-grupo</span></b></p>
+      <p class="campo-erro" id="pedido-erro-grupo" data-erro-grupo hidden></p>
+    </div>
+
+    <fieldset class="campo">
+      <legend>Esporte</legend>
+      <div class="opcoes">
+        <label><input type="radio" name="esporte" value="Vôlei"><span><i class="ph-fill ph-volleyball"></i>Vôlei</span></label>
+        <label><input type="radio" name="esporte" value="Futebol / society"><span><i class="ph-fill ph-soccer-ball"></i>Futebol</span></label>
+        <label><input type="radio" name="esporte" value="Futevôlei / vôlei de praia"><span><i class="ph-fill ph-sun"></i>Futevôlei</span></label>
+        <label><input type="radio" name="esporte" value="Beach tennis / padel"><span><i class="ph-fill ph-tennis-ball"></i>Beach tennis</span></label>
+        <label><input type="radio" name="esporte" value="Basquete"><span><i class="ph-fill ph-basketball"></i>Basquete</span></label>
+        <label><input type="radio" name="esporte" value="Outro"><span><i class="ph-fill ph-plus-circle"></i>Outro</span></label>
+      </div>
+      <div class="campo-outro" data-outro hidden>
+        <label for="pedido-outro">Qual esporte?</label>
+        <input id="pedido-outro" name="outro" type="text" maxlength="40" placeholder="Ex.: handebol">
+      </div>
+      <p class="campo-erro" data-erro-esporte hidden></p>
+    </fieldset>
+
+    <button class="btn btn-ouro pedido-envia" type="submit"><i class="ph-fill ph-whatsapp-logo"></i> Enviar no WhatsApp</button>
+  </form>
+</dialog>
+
+<footer class="rodape">
+  <a class="marca" href="#inicio" aria-label="MemberStars, voltar ao início">
+    <img src="assets/marca/MEM1-bg.png" alt="" width="502" height="497" loading="lazy">
+    <span class="marca-nome">MEMBER<b>STARS</b></span>
+  </a>
+  <p>Apps de esporte para grupos amadores.</p>
+  <p class="rodape-copy">© 2026 MemberStars</p>
+</footer>
+
+<script src="js/site.js" defer></script>
+</body>
+</html>
