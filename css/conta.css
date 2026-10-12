@@ -10,6 +10,8 @@
 .campo input[type="tel"]::placeholder { color: #8a95b4; }
 .campo input[type="tel"]:focus { outline: none; border-color: var(--ouro); box-shadow: 0 0 0 3px rgba(245,197,66,.25); }
 .google-btn { display: flex; justify-content: center; min-height: 44px; margin: 4px 0 14px; }
+/* a página é color-scheme: dark; sem isto o iframe do botão do Google ganha um fundo branco em volta */
+.google-btn iframe { color-scheme: light; }
 .pedido-alt { display: inline-flex; align-items: center; gap: 6px; font-size: .92rem; color: var(--tinta-2); border-bottom: 1px solid var(--linha-forte); }
 .pedido-alt:hover { color: var(--ouro); border-color: var(--ouro); }
 .pedido-conta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -10px 0 18px; padding: 10px 14px; border-radius: var(--raio-p); background: rgba(7,13,28,.5); border: 1px solid var(--linha); font-size: .92rem; color: var(--tinta-2); }
