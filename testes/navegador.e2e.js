@@ -24,6 +24,11 @@ const GIS_FALSO = `window.google = { accounts: { id: {
 } } };`;
 const KAREN = { email: 'karen@teste.com', name: 'Karen Souza' };
 const ADMIN = { email: 'admin@teste.com', name: 'Adm' };
+// lista de grupos simulada (a função de verdade fica no Supabase do app de vôlei)
+const VITRINE_PADRAO = { cadastrados: 2, jogaramNoMes: 1, grupos: [
+  { nome: 'Vôlei de Terça', cidade: 'Santa Luzia', uf: 'MG', cor: '#ffd700', logoUrl: '', desde: '', jogouNoMes: true },
+  { nome: 'Vôlei Meme Brasil', cidade: 'Santa Luzia', uf: 'MG', cor: '#b3790a', logoUrl: '', desde: '', jogouNoMes: false }
+] };
 
 function contaJsDeTeste(ligado) {
   return CONTA_JS
@@ -31,7 +36,7 @@ function contaJsDeTeste(ligado) {
     .replace(/var URL_SCRIPT = '[^']*'/, `var URL_SCRIPT = '${ligado ? URL_FALSA : ''}'`);
 }
 
-async function novaPagina(navegador, largura, { usuario, script, ligado = true, scriptFora = false }) {
+async function novaPagina(navegador, largura, { usuario, script, ligado = true, scriptFora = false, vitrine = VITRINE_PADRAO }) {
   const contexto = await navegador.newContext({ viewport: { width: largura, height: largura < 500 ? 844 : 900 } });
   const pagina = await contexto.newPage();
   const erros = [];
@@ -45,6 +50,12 @@ async function novaPagina(navegador, largura, { usuario, script, ligado = true, 
     r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
       body: JSON.stringify(script.chamar(corpo.acao, corpo.token, corpo.dados)) });
   });
+  await contexto.route(/grupos-api\?lista=grupos/, r => {
+    if (vitrine === 'fora') return r.abort();
+    if (vitrine === 'pendurada') return;   // nunca responde: o site desiste sozinho em 10 s
+    r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(vitrine) });
+  });
+  await contexto.route(/supabase\.co\/storage\//, r => r.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><rect width="56" height="56" fill="#4d7cff"/></svg>' }));
   if (usuario) await pagina.addInitScript(t => { window.__tokenTeste = t; }, tokenFalso(usuario));
   return { pagina, erros, contexto };
 }
@@ -83,7 +94,7 @@ async function roteiroPopup(navegador, largura) {
   await abrePopup(pagina);
   await pagina.waitForSelector(visivel('[data-passo="form"]'));   // já logada: pula o passo "Entrar"
   await pagina.fill('#pedido-grupo', 'Vôlei de Domingo');
-  await pagina.click('label:has(input[value="Vôlei"])');
+  await pagina.click('label:has(input[value="Futevôlei / vôlei de praia"])');
   await pagina.fill('#pedido-celular', '9873');
   await pagina.click('[data-envia]');
   await pagina.waitForSelector(visivel('[data-erro-celular]'));
@@ -120,7 +131,7 @@ async function roteiroPopup(navegador, largura) {
   await abrePopup(pagina);
   await pagina.click(visivel('[data-passo="entrar"]') + ' [data-google-falso]');
   await pagina.fill('#pedido-grupo', 'Time Novo');
-  await pagina.click('label:has(input[value="Vôlei"])');
+  await pagina.click('label:has(input[value="Futevôlei / vôlei de praia"])');
   await pagina.fill('#pedido-celular', '31987310965');
   await pagina.click('[data-envia]');
   await pagina.waitForSelector(visivel('[data-erro-envio]'));
@@ -276,7 +287,106 @@ async function roteiroAdmin(navegador, largura) {
   await contexto.close();
 }
 
-const ROTEIROS = [roteiroPopup, roteiroPedidos, roteiroAdmin];
+async function roteiroVolei(navegador, largura) {
+  const CRIAR = 'https://volei.memberstars.com/criar';
+  const script = criarScriptFalso();
+  let { pagina, erros, contexto } = await novaPagina(navegador, largura, { usuario: KAREN, script, vitrine: 'fora' });
+  await pagina.goto(BASE);
+  // botões diretos para o app de vôlei: hero, seção do vôlei e chamada final
+  assert.strictEqual(await pagina.getAttribute('#inicio .hero-ctas a.btn-ouro', 'href'), CRIAR);
+  assert.ok((await pagina.textContent('#inicio .hero-ctas a.btn-ouro')).includes('vôlei'));
+  assert.ok((await pagina.textContent('#inicio .hero-ctas [data-contato]')).includes('Outro esporte'));
+  assert.strictEqual(await pagina.locator(`#apps a[href="${CRIAR}"]`).count(), 1);
+  assert.strictEqual(await pagina.locator(`#contato a[href="${CRIAR}"]`).count(), 1);
+  assert.ok((await pagina.textContent('#apps [data-texto-volei]')).includes('toda semana'), 'sem lista: texto genérico');
+
+  // pop-up: Vôlei troca o formulário pelo aviso; outro esporte volta ao formulário
+  await abrePopup(pagina);
+  await pagina.click(visivel('[data-passo="entrar"]') + ' [data-google-falso]');
+  await pagina.waitForSelector(visivel('[data-passo="form"]'));
+  await pagina.click('label:has(input[value="Vôlei"])');
+  assert.ok(await pagina.isVisible('[data-aviso-volei]'));
+  assert.strictEqual(await pagina.getAttribute('[data-aviso-volei] a', 'href'), CRIAR);
+  assert.strictEqual(await pagina.isVisible('[data-envia]'), false);
+  assert.strictEqual(await pagina.isVisible('#pedido-grupo'), false);
+  assert.strictEqual(await pagina.isVisible('#pedido-celular'), false);
+  await semRolagemLateral(pagina);
+  await pagina.click('label:has(input[value="Basquete"])');
+  assert.strictEqual(await pagina.isVisible('[data-aviso-volei]'), false);
+  assert.ok(await pagina.isVisible('[data-envia]'));
+  await pagina.fill('#pedido-grupo', 'Basquete da Firma');
+  await pagina.fill('#pedido-celular', '31987310965');
+  await pagina.click('[data-envia]');
+  await pagina.waitForSelector(visivel('[data-passo="pronto"]'));
+  assert.strictEqual(script.linhas()[1][7], 'Basquete', 'o formulário volta inteiro e grava normal');
+  assert.deepStrictEqual(erros, []);
+  await contexto.close();
+
+  // área desligada (fluxo antigo do WhatsApp): o aviso do vôlei também aparece
+  ({ pagina, erros, contexto } = await novaPagina(navegador, largura, { script, ligado: false, vitrine: 'fora' }));
+  await pagina.goto(BASE);
+  await abrePopup(pagina);
+  await pagina.waitForSelector(visivel('[data-passo="form"]'));
+  await pagina.click('label:has(input[value="Vôlei"])');
+  assert.ok(await pagina.isVisible('[data-aviso-volei]'));
+  assert.strictEqual(await pagina.isVisible('[data-envia]'), false);
+  assert.deepStrictEqual(erros, []);
+  await contexto.close();
+}
+
+function vitrineCom(n, ativos) {
+  const grupos = Array.from({ length: n }, (_, i) => ({
+    nome: 'Grupo ' + (i + 1), cidade: 'Belo Horizonte', uf: 'MG', cor: '#123456', logoUrl: '', desde: '2026-10-01', jogouNoMes: i < ativos
+  }));
+  grupos[0] = { ...grupos[0], nome: 'Vôlei de Terça', cor: '#ffd700' };
+  grupos[1] = { ...grupos[1], nome: 'Time <b>Forte</b>', cor: 'red', logoUrl: 'javascript:alert(1)' };
+  grupos[2] = { ...grupos[2], nome: 'Com Logo', logoUrl: 'https://lzwmirrjpoqucwlhgkku.supabase.co/storage/v1/object/public/fotos-grupos/x/logo.png' };
+  return { cadastrados: n, jogaramNoMes: ativos, grupos };
+}
+
+async function roteiroGrupos(navegador, largura) {
+  const script = criarScriptFalso();
+  const rolaAteVolei = (pagina) => pagina.locator('#apps').scrollIntoViewIfNeeded();
+
+  // lista cheia: frase, 12 cartões, "ver todos", selos, iniciais, logo, texto do vôlei com o número
+  let { pagina, erros, contexto } = await novaPagina(navegador, largura, { script, vitrine: vitrineCom(15, 3) });
+  await pagina.goto(BASE);
+  await rolaAteVolei(pagina);
+  await pagina.waitForSelector('#grupos:not([hidden])');
+  assert.strictEqual(await pagina.getAttribute('[data-frase-grupos]', 'aria-label'), '15 grupos cadastrados, 3 jogaram no último mês');
+  await pagina.locator('[data-frase-grupos]').scrollIntoViewIfNeeded();   // no celular a seção é alta: rolar até a manchete
+  await pagina.waitForFunction(() => document.querySelector('[data-frase-grupos]').textContent === '15 grupos cadastrados, 3 jogaram no último mês');
+  assert.strictEqual(await pagina.locator('.grupo-cartao:visible').count(), 12);
+  assert.strictEqual(await pagina.textContent('[data-ver-todos]'), 'Ver todos os 15 grupos');
+  await pagina.click('[data-ver-todos]');
+  assert.strictEqual(await pagina.locator('.grupo-cartao:visible').count(), 15);
+  assert.strictEqual(await pagina.isVisible('[data-ver-todos]'), false);
+  assert.strictEqual(await pagina.locator('.grupo-selo').count(), 3);
+  assert.strictEqual(await pagina.textContent('.grupo-cartao:nth-child(1) .grupo-escudo'), 'VT');
+  assert.strictEqual(await pagina.evaluate(() => getComputedStyle(document.querySelector('.grupo-cartao:nth-child(1) .grupo-escudo')).color), 'rgb(26, 20, 5)', 'iniciais escuras no dourado');
+  assert.strictEqual(await pagina.textContent('.grupo-cartao:nth-child(2) .grupo-txt b'), 'Time <b>Forte</b>');
+  assert.strictEqual(await pagina.locator('.grupo-cartao:nth-child(2) img').count(), 0, 'logo fora do Supabase vira iniciais');
+  assert.strictEqual(await pagina.locator('.grupo-cartao:nth-child(3) img').count(), 1);
+  assert.strictEqual(await pagina.locator('#grupos a[href^="https://volei.memberstars.com/"]').count(), 1, 'só o botão de criar; cartões sem link');
+  assert.ok((await pagina.textContent('#apps [data-texto-volei]')).includes('organiza 15 grupos de vôlei'));
+  await semRolagemLateral(pagina);
+  assert.deepStrictEqual(erros, []);
+  await contexto.close();
+
+  // função fora do ar, resposta com error, item inválido e função pendurada: seção escondida, sem erro de JS
+  for (const vitrine of ['fora', { error: 'Lista de grupos indisponível.' }, { cadastrados: 1, jogaramNoMes: 0, grupos: [{ cidade: 'X' }] }, 'pendurada']) {
+    ({ pagina, erros, contexto } = await novaPagina(navegador, largura, { script, vitrine }));
+    await pagina.goto(BASE);
+    await rolaAteVolei(pagina);
+    await pagina.waitForTimeout(vitrine === 'pendurada' ? 11000 : 1500);
+    assert.strictEqual(await pagina.isVisible('#grupos'), false, JSON.stringify(vitrine));
+    assert.ok((await pagina.textContent('#apps [data-texto-volei]')).includes('toda semana'));
+    assert.deepStrictEqual(erros, [], JSON.stringify(vitrine));
+    await contexto.close();
+  }
+}
+
+const ROTEIROS = [roteiroPopup, roteiroPedidos, roteiroAdmin, roteiroVolei, roteiroGrupos];
 
 (async () => {
   const servidor = await iniciar(PORTA);

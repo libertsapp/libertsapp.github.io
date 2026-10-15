@@ -31,6 +31,69 @@ function linkWhatsApp(grupo, esporte, numero) {
   return 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(texto);
 }
 
+/* ---------------- Vôlei e "Grupos em quadra" (funções puras: testes/grupos.test.js) ---------------- */
+
+// Vôlei já tem app pronto: quem quer grupo de vôlei cria sozinho lá (não vira pedido na planilha).
+var URL_CRIAR_VOLEI = 'https://volei.memberstars.com/criar';
+// Lista pública dos grupos (função grupos-api do app de vôlei; guarda 5 minutos lá).
+var URL_VITRINE = 'https://lzwmirrjpoqucwlhgkku.supabase.co/functions/v1/grupos-api?lista=grupos';
+// Logo de grupo só vem do armazenamento do Supabase do vôlei; qualquer outro endereço vira iniciais.
+var PREFIXO_LOGO = 'https://lzwmirrjpoqucwlhgkku.supabase.co/storage/';
+var COR_PADRAO_GRUPO = '#4d7cff';
+var PALAVRAS_MIUDAS = ['de', 'da', 'do', 'das', 'dos', 'e'];
+
+/* "12 grupos cadastrados, 8 jogaram no último mês" em pedaços: os números ficam separados para a página
+   pintar de dourado e animar. Singular e zero tratados. */
+function partesFraseGrupos(cadastrados, jogaram) {
+  var partes = [cadastrados, cadastrados === 1 ? ' grupo cadastrado, ' : ' grupos cadastrados, '];
+  if (!jogaram) partes.push('nenhum jogou no último mês');
+  else partes.push(jogaram, jogaram === 1 ? ' jogou no último mês' : ' jogaram no último mês');
+  return partes;
+}
+function fraseGrupos(cadastrados, jogaram) { return partesFraseGrupos(cadastrados, jogaram).join(''); }
+
+// Texto da seção "MemberStars Vôlei": com o total real quando a lista chega; sem ela, genérico.
+function textoVolei(total) {
+  var meio = total ? 'hoje organiza ' + total + (total === 1 ? ' grupo' : ' grupos') + ' de vôlei.' : 'hoje organiza grupos de vôlei toda semana.';
+  return 'Nasceu numa quadra de terça à noite e ' + meio + ' Check-in, sorteio, ranking, caixa e o placar de cada rodada.';
+}
+
+// "Vôlei de Terça" -> "VT"; uma palavra só -> duas letras; nada aproveitável -> "MS".
+function iniciaisDoGrupo(nome) {
+  var palavras = String(nome || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .split(/[^A-Za-z0-9]+/).filter(function (p) { return p && PALAVRAS_MIUDAS.indexOf(p.toLowerCase()) < 0; });
+  if (!palavras.length) return 'MS';
+  if (palavras.length === 1) return palavras[0].slice(0, 2).toUpperCase();
+  return (palavras[0][0] + palavras[palavras.length - 1][0]).toUpperCase();
+}
+
+function corSegura(cor) {
+  return /^#[0-9a-f]{6}$/i.test(String(cor || '')) ? String(cor).toLowerCase() : COR_PADRAO_GRUPO;
+}
+
+// Luminância relativa (WCAG) de uma cor #rrggbb.
+function luminancia(hex) {
+  var canal = function (i) {
+    var v = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * canal(1) + 0.7152 * canal(3) + 0.0722 * canal(5);
+}
+
+/* Iniciais escuras ou brancas: a que der mais contraste com a cor do grupo. Um limite fixo de luminância
+   deixava branco em cores médias (rosa, lilás, o azul padrão) com contraste abaixo de 4.5:1. */
+function corDoTexto(cor) {
+  var fundo = luminancia(corSegura(cor)) + 0.05;
+  var comBranco = 1.05 / fundo;
+  var comEscuro = fundo / (luminancia('#1a1405') + 0.05);
+  return comEscuro >= comBranco ? '#1a1405' : '#ffffff';
+}
+
+function logoSeguro(url) {
+  var u = String(url || '');
+  return u.indexOf(PREFIXO_LOGO) === 0 ? u : '';
+}
+
 /* ---------------- Sorteio (função pura: testada em Node, ver testes/sorteio.test.js) ----------------
    Mesma ideia do app: primeiro espalha as mulheres (nenhum time fica com 2 a mais que outro), depois
    completa com os homens sempre no time com menos gente; empate vai para quem tem menos estrelas.
@@ -72,7 +135,11 @@ function sortearTimes(jogadores, nTimes, aleatorio) {
   return times;
 }
 
-if (typeof module !== 'undefined' && module.exports) module.exports = { sortearTimes: sortearTimes, enderecoDoGrupo: enderecoDoGrupo, linkWhatsApp: linkWhatsApp };
+if (typeof module !== 'undefined' && module.exports) module.exports = {
+  sortearTimes: sortearTimes, enderecoDoGrupo: enderecoDoGrupo, linkWhatsApp: linkWhatsApp,
+  URL_CRIAR_VOLEI: URL_CRIAR_VOLEI, URL_VITRINE: URL_VITRINE, partesFraseGrupos: partesFraseGrupos, fraseGrupos: fraseGrupos,
+  textoVolei: textoVolei, iniciaisDoGrupo: iniciaisDoGrupo, corSegura: corSegura, corDoTexto: corDoTexto, logoSeguro: logoSeguro
+};
 
 /* ================================== Página ================================== */
 if (typeof document !== 'undefined') (function () {
@@ -108,6 +175,7 @@ if (typeof document !== 'undefined') (function () {
   var comConta = typeof Conta !== 'undefined' && !!Conta && Conta.configurada();
   var TEXTO_ENVIA = comConta ? '<i class="ph-bold ph-paper-plane-tilt"></i> Enviar pedido' : '<i class="ph-fill ph-whatsapp-logo"></i> Enviar no WhatsApp';
   var enviando = false;
+  var avisoVolei = $('[data-aviso-volei]', form);
 
   // celular, "pedido em nome de" e o link Meus pedidos só existem com a área de pedidos ligada
   $$('[data-so-conta]').forEach(function (el) { el.hidden = !comConta; });
@@ -131,6 +199,12 @@ if (typeof document !== 'undefined') (function () {
   }
   function mostraPasso(nome) {
     $$('[data-passo]', pedido).forEach(function (p) { p.hidden = p.dataset.passo !== nome; });
+  }
+  // Vôlei tem app pronto: com Vôlei marcado, o formulário dá lugar ao aviso com o link para criar o grupo.
+  function atualizaVolei() {
+    var ehVolei = !!$('input[name="esporte"][value="Vôlei"]:checked', form);
+    form.classList.toggle('e-volei', ehVolei);
+    avisoVolei.hidden = !ehVolei;
   }
   function entrouNoPedido(sessao) {
     nomeConta.textContent = sessao.nome;
@@ -161,6 +235,7 @@ if (typeof document !== 'undefined') (function () {
     mostraErro(erroGrupo, campoGrupo, ''); mostraErro(erroEsporte, null, ''); mostraErro(erroCelular, campoCelular, ''); mostraErro(erroEnvio, null, '');
     botaoWhatsErro.hidden = true;
     if (esporte) { var op = $('input[name="esporte"][value="' + esporte + '"]', form); if (op) op.checked = true; }
+    atualizaVolei();
     pedido.showModal();
     var sessao = comConta ? Conta.atual() : null;
     if (!comConta) { mostraPasso('form'); campoGrupo.focus(); }
@@ -193,11 +268,13 @@ if (typeof document !== 'undefined') (function () {
         caixaOutro.hidden = r.value !== 'Outro' || !r.checked;
         if (!caixaOutro.hidden) campoOutro.focus();
         mostraErro(erroEsporte, null, '');
+        atualizaVolei();
       });
     });
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       if (enviando) return;   // clique duplo não grava dois pedidos
+      if (form.classList.contains('e-volei')) return;   // vôlei não vira pedido (o botão nem aparece)
       var grupo = campoGrupo.value.trim().replace(/\s+/g, ' ');
       var esporte = esporteEscolhido();
       var grupoOk = !!enderecoDoGrupo(grupo);
@@ -239,6 +316,97 @@ if (typeof document !== 'undefined') (function () {
       history.replaceState(null, '', location.pathname + location.search);
       abrePedido();
     }
+  }
+
+  /* ---------- Grupos em quadra: lista pública do app de vôlei ----------
+     Busca uma vez, quando a seção do vôlei chega perto da tela. Qualquer falha (rede, 10 s, resposta estranha)
+     deixa a seção escondida e os textos genéricos no lugar: nada aparece quebrado. */
+  var secaoGrupos = $('[data-grupos]'), listaGrupos = $('[data-lista-grupos]'), verTodos = $('[data-ver-todos]');
+  var MOSTRAR_GRUPOS = 12;
+
+  function vitrineValida(d) {
+    return !!d && !d.error && typeof d.cadastrados === 'number' && d.cadastrados > 0 &&
+      typeof d.jogaramNoMes === 'number' && Array.isArray(d.grupos) &&
+      d.grupos.every(function (g) { return g && typeof g.nome === 'string' && g.nome; });
+  }
+
+  function cartaoGrupo(g, i) {
+    var li = document.createElement('li');
+    li.className = 'grupo-cartao' + (g.jogouNoMes ? ' ativo' : '');
+    li.hidden = i >= MOSTRAR_GRUPOS;
+    var escudo = document.createElement('span');
+    escudo.className = 'grupo-escudo';
+    escudo.style.setProperty('--cor-grupo', corSegura(g.cor));
+    escudo.style.setProperty('--cor-iniciais', corDoTexto(g.cor));
+    var logo = logoSeguro(g.logoUrl);
+    if (logo) {
+      var img = document.createElement('img');
+      img.src = logo; img.alt = ''; img.width = 56; img.height = 56; img.loading = 'lazy'; img.decoding = 'async';
+      escudo.appendChild(img);
+    } else escudo.textContent = iniciaisDoGrupo(g.nome);
+    var txt = document.createElement('span');
+    txt.className = 'grupo-txt';
+    var nome = document.createElement('b');
+    nome.textContent = g.nome;
+    var onde = document.createElement('small');
+    onde.textContent = [g.cidade, g.uf].filter(Boolean).join('/');
+    txt.appendChild(nome);
+    txt.appendChild(onde);
+    if (g.jogouNoMes) {
+      var selo = document.createElement('span');
+      selo.className = 'grupo-selo';
+      selo.innerHTML = '<i class="ph-fill ph-circle"></i> ';
+      selo.appendChild(document.createTextNode('em atividade'));
+      txt.appendChild(selo);
+    }
+    li.appendChild(escudo);
+    li.appendChild(txt);
+    return li;
+  }
+
+  function mostraGrupos(d) {
+    var titulo = $('[data-frase-grupos]');
+    titulo.textContent = '';
+    partesFraseGrupos(d.cadastrados, d.jogaramNoMes).forEach(function (p) {
+      if (typeof p !== 'number') { titulo.appendChild(document.createTextNode(p)); return; }
+      // número dourado que conta até o valor quando a manchete aparece (contar() já respeita o movimento reduzido)
+      var n = document.createElement('span');
+      n.className = 'ouro';
+      n.dataset.conta = String(p);
+      n.textContent = podeAnimar ? '0' : String(p);
+      titulo.appendChild(n);
+    });
+    titulo.setAttribute('aria-label', fraseGrupos(d.cadastrados, d.jogaramNoMes));
+    listaGrupos.textContent = '';
+    d.grupos.forEach(function (g, i) { listaGrupos.appendChild(cartaoGrupo(g, i)); });
+    verTodos.textContent = 'Ver todos os ' + d.grupos.length + ' grupos';
+    verTodos.hidden = d.grupos.length <= MOSTRAR_GRUPOS;
+    $('[data-texto-volei]').textContent = textoVolei(d.cadastrados);
+    secaoGrupos.hidden = false;
+    if (!podeAnimar) $$('[data-conta]', titulo).forEach(contar);
+  }
+
+  function buscaGrupos() {
+    var controle = typeof AbortController === 'function' ? new AbortController() : null;
+    var limite = setTimeout(function () { if (controle) controle.abort(); }, 10000);
+    fetch(URL_VITRINE, { signal: controle ? controle.signal : undefined })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (vitrineValida(d)) mostraGrupos(d); })
+      .catch(function () { /* fora do ar: seção escondida, textos genéricos */ })
+      .then(function () { clearTimeout(limite); });
+  }
+
+  if (secaoGrupos) {
+    verTodos.addEventListener('click', function () {
+      $$('.grupo-cartao', listaGrupos).forEach(function (li) { li.hidden = false; });
+      verTodos.hidden = true;
+    });
+    var obsGrupos = new IntersectionObserver(function (e) {
+      if (!e[0].isIntersecting) return;
+      obsGrupos.disconnect();
+      buscaGrupos();
+    }, { rootMargin: '800px 0px' });
+    obsGrupos.observe($('#apps'));
   }
 
   /* ---------- topo ganha fundo depois que a pessoa sai do alto da página ---------- */

@@ -71,8 +71,8 @@
       </h1>
       <p class="hero-sub revela" style="--i:8">Check-in, sorteio de times equilibrado, ranking e Hall da Fama para o grupo que joga toda semana.</p>
       <div class="hero-ctas revela" style="--i:9">
-        <a class="btn btn-ouro" href="#contato" data-contato><i class="ph-bold ph-trophy"></i> Quero no meu time</a>
-        <a class="btn btn-vidro" href="#recursos"><i class="ph-fill ph-play"></i> Ver o app em ação</a>
+        <a class="btn btn-ouro" href="https://volei.memberstars.com/criar"><i class="ph-fill ph-volleyball"></i> Criar o app do meu grupo de vôlei</a>
+        <a class="btn btn-vidro" href="#contato" data-contato><i class="ph-bold ph-plus-circle"></i> Outro esporte</a>
       </div>
     </div>
 
@@ -134,8 +134,9 @@
       <div class="apps-destaque-txt">
         <span class="selo"><i class="ph-fill ph-circle"></i> Em uso toda semana</span>
         <h2 class="titulo-secao">MemberStars <span class="ouro">Vôlei</span></h2>
-        <p>Nasceu numa quadra de terça à noite e hoje organiza dois grupos de vôlei. Check-in, sorteio, ranking, caixa e o placar de cada rodada.</p>
+        <p data-texto-volei>Nasceu numa quadra de terça à noite e hoje organiza grupos de vôlei toda semana. Check-in, sorteio, ranking, caixa e o placar de cada rodada.</p>
         <a class="link-seta" href="#recursos">Conhecer os recursos <i class="ph-bold ph-arrow-right"></i></a>
+        <a class="btn btn-ouro apps-criar" href="https://volei.memberstars.com/criar"><i class="ph-fill ph-volleyball"></i> Criar o app do meu grupo</a>
       </div>
     </div>
 
@@ -145,6 +146,18 @@
       <a class="esporte surge" href="#contato" data-contato data-esporte="Futevôlei / vôlei de praia" style="--i:2"><i class="ph-fill ph-volleyball"></i><span><b>Futevôlei e vôlei de praia</b><small>Duplas que se revezam</small></span><i class="ph-bold ph-arrow-up-right seta"></i></a>
       <a class="esporte surge" href="#contato" data-contato data-esporte="Beach tennis / padel" style="--i:3"><i class="ph-fill ph-tennis-ball"></i><span><b>Beach tennis e padel</b><small>Chaves e ranking por dupla</small></span><i class="ph-bold ph-arrow-up-right seta"></i></a>
       <a class="esporte surge" href="#contato" data-contato data-esporte="Basquete" style="--i:4"><i class="ph-fill ph-basketball"></i><span><b>Basquete</b><small>Pontos, rebotes e MVP da noite</small></span><i class="ph-bold ph-arrow-up-right seta"></i></a>
+    </div>
+  </section>
+
+  <!-- ============ GRUPOS EM QUADRA (lista pública do app de vôlei; escondida até a lista chegar) ============ -->
+  <section class="secao grupos" id="grupos" data-grupos hidden aria-labelledby="grupos-tit">
+    <p class="sobrelinha"><i class="ph-fill ph-users-three"></i> Grupos em quadra</p>
+    <h2 class="titulo-secao surge" id="grupos-tit" data-frase-grupos></h2>
+    <ul class="grupos-lista" data-lista-grupos></ul>
+    <button class="btn btn-vidro" type="button" data-ver-todos hidden></button>
+    <div class="grupos-cta">
+      <p>Seu grupo pode ser o próximo.</p>
+      <a class="btn btn-ouro" href="https://volei.memberstars.com/criar"><i class="ph-fill ph-volleyball"></i> Criar o app do meu grupo</a>
     </div>
   </section>
 
@@ -311,8 +324,11 @@
   <section class="secao final" id="contato">
     <img class="final-escudo" src="assets/marca/MEM1-bg.png" alt="" aria-hidden="true" width="502" height="497" loading="lazy">
     <h2 class="final-titulo surge">Seu grupo merece um <span class="ouro">placar de verdade.</span></h2>
-    <p class="final-sub surge">Conta como o seu time joga e a gente prepara o app com a cara de vocês.</p>
-    <a class="btn btn-ouro btn-grande surge" href="#contato" data-contato><i class="ph-bold ph-trophy"></i> Quero no meu time</a>
+    <p class="final-sub surge">Vôlei: crie o app do seu grupo agora. Outro esporte: conta como o time joga e a gente monta.</p>
+    <div class="final-botoes surge">
+      <a class="btn btn-ouro btn-grande" href="https://volei.memberstars.com/criar"><i class="ph-fill ph-volleyball"></i> Criar grupo de vôlei</a>
+      <a class="btn btn-vidro btn-grande" href="#contato" data-contato><i class="ph-bold ph-plus-circle"></i> Outro esporte</a>
+    </div>
   </section>
 </main>
 
@@ -335,7 +351,7 @@
       <p class="pedido-sub" data-sub-form>Conta o nome do grupo e o esporte. A conversa continua no WhatsApp.</p>
       <p class="pedido-conta" data-so-conta hidden><i class="ph-fill ph-user-circle"></i> Pedido em nome de <b data-nome-conta></b> · <button type="button" class="link-btn" data-trocar-conta>trocar conta</button></p>
 
-      <div class="campo">
+      <div class="campo so-pedido">
         <label for="pedido-grupo">Nome do grupo</label>
         <input id="pedido-grupo" name="grupo" type="text" maxlength="60" autocomplete="organization" placeholder="Ex.: Futebol de Quinta" aria-describedby="pedido-endereco pedido-erro-grupo" required>
         <p class="campo-ajuda" id="pedido-endereco">Endereço do app: <b>memberstars.com/<span data-slug>seu-grupo</span></b></p>
@@ -359,15 +375,20 @@
         <p class="campo-erro" data-erro-esporte hidden></p>
       </fieldset>
 
-      <div class="campo" data-so-conta hidden>
+      <div class="aviso-volei" data-aviso-volei hidden>
+        <p><b>Vôlei já tem app pronto.</b> Crie o do seu grupo agora, em poucos minutos, sem esperar a gente.</p>
+        <a class="btn btn-ouro" href="https://volei.memberstars.com/criar"><i class="ph-fill ph-volleyball"></i> Criar o app do meu grupo</a>
+      </div>
+
+      <div class="campo so-pedido" data-so-conta hidden>
         <label for="pedido-celular">Celular (WhatsApp)</label>
         <input id="pedido-celular" name="celular" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="(31) 98731-0965" aria-describedby="pedido-erro-celular">
         <p class="campo-erro" id="pedido-erro-celular" data-erro-celular hidden></p>
       </div>
 
-      <p class="campo-erro pedido-erro" data-erro-envio role="alert" hidden></p>
-      <a class="btn btn-vidro pedido-whats-erro" href="#" target="_blank" rel="noopener" data-whats-erro hidden><i class="ph-fill ph-whatsapp-logo"></i> Enviar pelo WhatsApp</a>
-      <button class="btn btn-ouro pedido-envia" type="submit" data-envia><i class="ph-fill ph-whatsapp-logo"></i> Enviar no WhatsApp</button>
+      <p class="campo-erro pedido-erro so-pedido" data-erro-envio role="alert" hidden></p>
+      <a class="btn btn-vidro pedido-whats-erro so-pedido" href="#" target="_blank" rel="noopener" data-whats-erro hidden><i class="ph-fill ph-whatsapp-logo"></i> Enviar pelo WhatsApp</a>
+      <button class="btn btn-ouro pedido-envia so-pedido" type="submit" data-envia><i class="ph-fill ph-whatsapp-logo"></i> Enviar no WhatsApp</button>
     </form>
 
     <section class="passo" data-passo="pronto" hidden>
